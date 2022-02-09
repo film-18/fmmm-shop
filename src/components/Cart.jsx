@@ -30,7 +30,7 @@ const Cart = memo(() => {
         let canBuyAmount =  inStockCount - inCartCount;
         let _items = [...items]
 
-        //กำหนดเพื่อออออออออออออออ
+        //edit array
         _items = _items.map(_item => {
             if (_item.name === item.name) {
                 return {
@@ -47,28 +47,89 @@ const Cart = memo(() => {
 
     }, [cartItems, items])
 
-    //???
+    //ทำงานใหม่ rerender ตรงจำนวนที่เปลี่ยน
     useEffect(() => {
         rawItem.forEach(item => {
-            updateStock(item)
+
+            //all
+            let inStockCount = 0;
+            rawItem.forEach(_item => {
+                if (_item.name === item.name) {
+                    inStockCount = _item.stock
+                }
+            })
+
+            //ในตะกร้า
+            let inCartCount = 0;
+            cartItems.forEach(_item => {
+                if (_item.name === item.name) {
+                    inCartCount = _item.amount
+                }
+            })
+
+
+            let canBuyAmount =  inStockCount - inCartCount;
+            
+
+            setItems((_items) => {
+
+                return  _items.map(_item => {
+                    if (_item.name === item.name) {
+                        return {
+                            name: _item.name,
+                            price: _item.price,
+                            stock: canBuyAmount,
+                            img: _item.img
+                        }
+                    }
+                    return _item
+                })
+            })
+
         })
     }, [cartItems])
 
     const increaseItemToCart = useCallback((item) => {
 
+        let inStockCount = 0;
+        rawItem.forEach(_item => {
+            if (_item.name === item.name) {
+                inStockCount = _item.stock
+            }
+        })
+
+        //ในตะกร้า
+        let inCartCount = 0;
+        cartItems.forEach(_item => {
+            if (_item.name === item.name) {
+                inCartCount = _item.amount
+            }
+        })
+
+
+        let canBuyAmount =  inStockCount - inCartCount;
+
         let _cartItems = [...cartItems];
+
 
         _cartItems = _cartItems.map(_item => {
             if(item.name === _item.name) {
+                if (canBuyAmount === 0 && item.amount === 1)
+                    // item.amount = 1
+                    canBuyAmount = 1
+                console.log(canBuyAmount, item.amount)    
                 return {
                     name: _item.name,
                     price: _item.price,
-                    amount: _item.amount + 1
+                    amount: _item.amount + 1,
+                    stock: canBuyAmount
                 }
             }
+            console.log(canBuyAmount)
             return _item
         })
         setCartItems(_cartItems)
+
     }, [cartItems, updateStock])
 
     const decreaseItemToCart = useCallback((item) => {
@@ -82,7 +143,7 @@ const Cart = memo(() => {
                 return {
                     name: _item.name,
                     price: _item.price,
-                    amount: _item.amount - 1
+                    amount: _item.amount - 1,
                 }
             }
             return _item
@@ -111,7 +172,7 @@ const Cart = memo(() => {
             setCartItems([...cartItems, {
                 name: item.name,
                 price: item.price,
-                amount: 1,
+                amount: 1
             }])
         }
     }, [cartItems, increaseItemToCart])
@@ -125,7 +186,7 @@ const Cart = memo(() => {
         cartItems.forEach(item => {
             total += item.price * item.amount;
         })
-        return total;
+        return total.toFixed(2);
     }, [cartItems])
 
 
@@ -156,10 +217,11 @@ const Cart = memo(() => {
                                             <div className="card-title">
                                                 <p>{item.name}</p>
                                                 <p>Starting at ฿ {item.price}</p>
-                                                <p>Available items : {item.stock}</p>
+                                                <p className="m-0 text-secondary">Available items : {item.stock}</p>
                                                 <button type="button" className="btn btn-dark btn-sm" onClick={() => {
                                                     addItemToCart(item)
                                                 }}
+                                                disabled={item.stock <= 0}
                                                 >Add to Cart</button>
                                                 </div>
                                             </div>
@@ -172,7 +234,7 @@ const Cart = memo(() => {
                     </div>
                 </div>
 
-                <div className="col-4">
+                <div className="col-4 p-0">
                     <div className="card border-success">
                         <div className="card-header border-success bg-success text-light">
                             Your Cart
@@ -182,26 +244,28 @@ const Cart = memo(() => {
                                cartItems.map((item => {
                                    return <>
                                         <div className="row bg-light border-pill">
-                                            <div className="col-8">
+                                            <div className="col-8 p-0">
                                                 <h1>{item.name}</h1>
-                                                <h6>{item.price} x {item.amount} = {item.price * item.amount} </h6>
+                                                <h6>{item.price} x {item.amount} = {(item.price * item.amount).toFixed(2)} </h6>
                                             </div>
-                                            <div className="col-4">
-                                                    <div className="row">
-                                                        <div className="col-4">
-                                                            <button type="button" className="btn btn-danger btn-sm text-center" onClick={() => {
+                                            <div className="col-4 p-0">
+                                                    <div className="row pr-4 pl-1 mt-3">
+                                                        <div className="col-4 p-0">
+                                                            <button type="button" className="btn btn-danger btn-sm text-center"  onClick={() => {
                                                                 decreaseItemToCart(item)
-                                                            }
-                                                            }
+                                                            }}
                                                         >-</button>
                                                         </div>
-                                                        <div className="col-4">
+                                                        <div className="col-4 p-0">
                                                             <p>{item.amount}</p>
                                                         </div>
-                                                        <div className="col-4">
-                                                            <button type="button" className="btn btn-warning btn-sm text-center" onClick={() => {
+                                                        <div className="col-4 p-0">
+                                                            
+                                                            <button type="button" className="btn btn-warning btn-sm text-center"  onClick={() => {
                                                                 increaseItemToCart(item)
-                                                            }}>+</button>
+                                                            }}
+                                                            disabled={item.stock === 1}
+                                                            >+</button>
                                                         </div>
                                                     </div>
                                            
