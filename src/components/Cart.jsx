@@ -115,9 +115,8 @@ const Cart = memo(() => {
         _cartItems = _cartItems.map(_item => {
             if(item.name === _item.name) {
                 if (canBuyAmount === 0 && item.amount === 1)
-                    // item.amount = 1
                     canBuyAmount = 1
-                console.log(canBuyAmount, item.amount)    
+                // console.log(canBuyAmount, item.amount)    
                 return {
                     name: _item.name,
                     price: _item.price,
@@ -125,7 +124,6 @@ const Cart = memo(() => {
                     stock: canBuyAmount
                 }
             }
-            console.log(canBuyAmount)
             return _item
         })
         setCartItems(_cartItems)
@@ -172,7 +170,8 @@ const Cart = memo(() => {
             setCartItems([...cartItems, {
                 name: item.name,
                 price: item.price,
-                amount: 1
+                amount: 1,
+                stock: item.stock
             }])
         }
     }, [cartItems, increaseItemToCart])
@@ -200,7 +199,8 @@ const Cart = memo(() => {
             <div className="row mt-5">
                 <div className="col border rounded-pill border-success">
                     <h1 className="text-uppercase fw-bold">
-                        fmmm shopping store 🧃🥝🍵🍏🥑🌲
+                        fmmm shopping store 
+                        <i class="fa-solid fa-cat"></i>
                     </h1>
                 </div>
             </div>
